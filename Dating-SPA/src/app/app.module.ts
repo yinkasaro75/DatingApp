@@ -5,8 +5,10 @@ import { NgModule } from '@angular/core';
 import { HttpClientModule} from '@angular/common/http';
 // tslint:disable-next-line:import-spacing
 import {BsDropdownModule, BsDropdownConfig} from 'ngx-bootstrap/dropdown';
+import { TabsModule, TabsetConfig } from 'ngx-bootstrap/tabs';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterModule } from '@angular/router';
+import { JwtModule } from '@auth0/angular-jwt';
 
 import { AppComponent } from './app.component';
 import { NavComponent } from './nav/nav.component';
@@ -16,15 +18,23 @@ import { RegisterComponent } from './register/register.component';
 import { ErrorInterceptorProvider } from './_services/error.interceptor';
 import { AlertifyService } from './_services/alertify.service';
 import { from } from 'rxjs';
-import { MemberListComponent } from './member-list/member-list.component';
+import { MemberListComponent } from './members/member-list/member-list.component';
 import { MessagesComponent } from './messages/messages.component';
 import { ListsComponent } from './lists/lists.component';
 import { appRoutes } from './routes';
 import { AuthGuard } from './_guard/auth.guard';
+import { UserService } from './_services/user.service';
+import { MemberCardComponent } from './members/member-list/member-card/member-card.component';
+import { MemberDetailComponent } from './members/member-detail/member-detail.component';
+import { MemberDetailResolver } from './_resolver/member-detail-resolver';
+import { MemberListResolver } from './_resolver/member-list-resolver';
+import { NgxGalleryModule } from '@kolkov/ngx-gallery';
 
 
-
-
+export function tokenGetter()
+{
+  return localStorage.getItem('token');
+}
 
 @NgModule({
   declarations: [
@@ -34,7 +44,9 @@ import { AuthGuard } from './_guard/auth.guard';
       RegisterComponent,
       MemberListComponent,
       MessagesComponent,
-      ListsComponent
+      ListsComponent,
+      MemberCardComponent,
+      MemberDetailComponent
    ],
   imports: [
     BrowserModule ,
@@ -42,12 +54,26 @@ import { AuthGuard } from './_guard/auth.guard';
     HttpClientModule,
     FormsModule,
     BsDropdownModule.forRoot(),
-    RouterModule.forRoot(appRoutes)
+    TabsModule,
+    NgxGalleryModule ,
+    RouterModule.forRoot(appRoutes),
+    JwtModule.forRoot({
+      config: {
+       tokenGetter: tokenGetter,
+       allowedDomains : ['localhost:5000'],
+       disallowedRoutes:[]
+      }
+    })
   ],
   providers: [ AuthService , ErrorInterceptorProvider,
      AlertifyService,
      BsDropdownConfig,
-    AuthGuard],
+     TabsetConfig,
+    AuthGuard,
+    UserService,
+    MemberDetailResolver,
+    MemberListResolver ],
+
   bootstrap: [AppComponent]
 })
 export class AppModule { }
